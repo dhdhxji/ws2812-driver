@@ -20,9 +20,9 @@ initial begin
     #10000 $finish;
 end
 
-always #150 clk <= !clk;
+always #50 clk <= !clk;
 
-ws2812_bit_encoder enc(
+ws2812_unipolar_rz_encoder enc(
     databit,
     clk,
     2'b01,//CMD_TX,
