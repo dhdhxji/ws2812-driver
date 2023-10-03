@@ -1,16 +1,17 @@
 SRCS:=$(wildcard src/*.v)
-BENCH_SRCS:=$(wildcard bench/*.v)
-OUTDIR:="bin/"
+BENCHES:=$(patsubst %.v,%.vvp,$(wildcard bench/*.v))
 
 all: runbench
 
-net: $(SRCS) $(BENCH_SRCS)
+%.vvp: %.v $(SRCS)
 	iverilog -o $@ $^
 
 .PHONY: runbench
-runbench: net
-	./$<
+runbench: $(BENCHES)
+	for vcd in $(BENCHES); do \
+		./$$vcd ;\
+	done
 
-.PHONY: view
-view: runbench
-	gtkwave out.vcd
+.PHONY: clean
+clean: 
+	rm $(BENCHES) *.vcd 
