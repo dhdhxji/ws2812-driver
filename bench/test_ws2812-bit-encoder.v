@@ -9,7 +9,7 @@ wire data_out;
 
 
 initial begin
-    $dumpfile("out.vcd");
+    $dumpfile("test_ws2812_bit_encoder.vcd");
     $dumpvars(0, test_ws2812_bit_encoder);
     
     clk = 0;
