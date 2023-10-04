@@ -15,11 +15,14 @@ initial begin
     cmd = 2'b01;
     clk = 0;
 
-    #5000 cmd = 2'b00;
-    #30000 $finish;
+    #150000 $finish;
 end
 
 always #50 clk <= !clk;
+
+always @(posedge cmd_req) begin
+    cmd = 2'b10;
+end
 
 ws2812_rgb_controller rgb_controller(
     clk,

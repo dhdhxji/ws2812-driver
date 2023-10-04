@@ -15,15 +15,19 @@ localparam CMD_TX           = 2'b01;
 localparam CMD_RESET        = 2'b10;
 
 reg[1:0] current_state;
+
 reg[23:0] rgb_buffer;
+wire[4:0] rgb_current_tx_bit_index;
+reg rgb_current_tx_bit;
 reg[4:0] rgb_bits_sent;
 
 reg[1:0] encoder_command;
 wire encoder_waits_command;
 
+assign rgb_current_tx_bit_index = 24 - rgb_bits_sent - 1;
 
 ws2812_unipolar_rz_encoder encoder(
-    rgb_buffer[23],
+    rgb_current_tx_bit,
     clk,
     encoder_command,
     encoder_waits_command,
@@ -43,30 +47,18 @@ always @(posedge clk) begin
             rgb_bits_sent = 0;
 
             current_state = command;
-            cmd_wait = 1'b1;
-
             encoder_command = CMD_IDLE;
+            cmd_wait = 1'b1;
         end
         
         CMD_TX: begin
             encoder_command = CMD_TX;
-
-            
-            if (rgb_bits_sent < 24 - 1) begin
-                cmd_wait = 1'b0;
-            end
-            else if (rgb_bits_sent == 24 - 2) begin
-                cmd_wait = 1'b1;
-            end 
-            else if (command == CMD_TX && (rgb_bits_sent >= 24 - 1)) begin
-                cmd_wait = 1'b0;
-                rgb_buffer = rgb_message_encoded;
-                rgb_bits_sent = 0;
-            end
-            else current_state = CMD_IDLE;
-        end  
+        end
         
-        CMD_RESET: begin end
+        CMD_RESET: begin 
+            cmd_wait = 1'b0;
+            encoder_command = CMD_RESET;
+        end
         default: current_state <= CMD_IDLE;
     endcase
 end
@@ -74,10 +66,30 @@ end
 always @(posedge encoder_waits_command) begin
     case (current_state)
         CMD_TX: begin
-            rgb_bits_sent = rgb_bits_sent + 1;
-            rgb_buffer = rgb_buffer << 1;
+            if (rgb_bits_sent >= 24) begin
+                encoder_command = CMD_IDLE;
+                current_state = CMD_IDLE;
+            end
+            else begin
+                if (rgb_bits_sent == 0) cmd_wait = 1'b0;
+
+                rgb_current_tx_bit = rgb_buffer[rgb_current_tx_bit_index];
+                rgb_bits_sent = rgb_bits_sent + 1;
+
+                // Prefetch next pixel
+                if (rgb_bits_sent == (24 - 1)) begin
+                    cmd_wait = 1'b1;
+                end else if (rgb_bits_sent == (24) && command == CMD_TX) begin
+                    cmd_wait = 1'b0;
+                    rgb_bits_sent = 0;
+                end
+            end  
         end
         default: begin end
+
+        CMD_RESET: begin
+            current_state = CMD_IDLE;
+        end
     endcase
 end
     
