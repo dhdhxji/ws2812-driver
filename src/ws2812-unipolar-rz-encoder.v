@@ -16,7 +16,8 @@ localparam CLK_PERIOD_NS    = (1000 * 1000 * 1000) / (CLK_FREQ_KHZ * 1000);
 localparam T_HI_TRUE_TICKS  = T_HI_TRUE_NS / CLK_PERIOD_NS;
 localparam T_HI_FALSE_TICKS = T_HI_FALSE_NS / CLK_PERIOD_NS;
 localparam T_PERIOD_TICKS   = T_PERIOD_NS / CLK_PERIOD_NS;
-localparam COUNTER_SIZE     = $clog2(T_PERIOD_TICKS + 1);
+localparam T_RESET_TICKS    = T_RESET_NS / CLK_PERIOD_NS;
+localparam COUNTER_SIZE     = $clog2(T_RESET_TICKS + 1);
 
 
 localparam CMD_IDLE   = 2'b00;
@@ -31,7 +32,7 @@ always @(posedge clk) begin
     case (current_state)
         CMD_IDLE: begin
             current_state <= command;
-            cmd_wait <= (command == CMD_IDLE);
+            cmd_wait <= 1'b1;
             tx_data <= databit;
             cycle_counter <= 0;
             data_output <= 0;
@@ -45,6 +46,7 @@ always @(posedge clk) begin
             // Initiate command fetching a little bit earlier
             // to allow tx interruptionless data update while doing TX.
             if (cycle_counter >= T_PERIOD_TICKS-2) cmd_wait <= 1'b1;
+            else cmd_wait <= 1'b0;
 
             if (cycle_counter >= T_PERIOD_TICKS-1) begin
                 cycle_counter = 0;
@@ -56,7 +58,15 @@ always @(posedge clk) begin
                 cycle_counter = cycle_counter + 1;
         end  
         
-        CMD_RESET: begin end
+        CMD_RESET: begin 
+            if (cycle_counter >= T_RESET_TICKS) begin
+                current_state = CMD_IDLE;
+            end
+
+            cmd_wait = 1'b0;
+            data_output = 1'b0;
+            cycle_counter = cycle_counter + 1;
+        end
         default: current_state <= CMD_IDLE;
     endcase
 end
