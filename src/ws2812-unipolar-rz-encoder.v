@@ -46,6 +46,8 @@ wire encoded_bit_logic = ((cycle_counter < T_HI_TRUE_TICKS) && (tx_data == 1'b1)
 always @(posedge clk) begin
     case (current_state)
         STATE_CMD_FETCH_START: begin
+            data_request <= 1'b0;
+            encoded_output <= 1'b0;
             cmd_request <= 1'b1;
             current_state <= STATE_CMD_FETCH_END;
         end 
@@ -89,7 +91,7 @@ always @(posedge clk) begin
         end
 
         STATE_RESET_PREP: begin
-            tx_data <= databit;
+            tx_data <= 0;
             cycle_counter <= 0;
             current_state <= STATE_RESET;
         end 
