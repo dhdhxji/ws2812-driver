@@ -4,6 +4,7 @@ module test_ws2812_bit_encoder;
 
 reg clk;
 wire cmd_req;
+wire data_req;
 reg databit;
 wire data_out;
 
@@ -27,6 +28,7 @@ ws2812_unipolar_rz_encoder enc(
     clk,
     2'b01,//CMD_TX,
     cmd_req,
+    data_req,
     data_out
 );
 
