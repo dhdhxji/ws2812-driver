@@ -70,20 +70,20 @@ always @(posedge clk) begin
 
         STATE_TX: begin
             encoded_output <= encoded_bit_logic;
-            cycle_counter <= cycle_counter + 1;
+            cycle_counter <= cycle_counter + 1'd1;
             if (cycle_counter == (T_PERIOD_TICKS - 4)) current_state <= STATE_TX_DATA_PREFETCH_START;
         end 
 
         STATE_TX_DATA_PREFETCH_START: begin
             encoded_output <= encoded_bit_logic;
-            cycle_counter <= cycle_counter + 1;
+            cycle_counter <= cycle_counter + 1'd1;
             data_request <= 1'b1;
             current_state <= STATE_TX_DATA_PREFETCH_END;
         end 
 
         STATE_TX_DATA_PREFETCH_END: begin
             encoded_output <= encoded_bit_logic;
-            cycle_counter <= cycle_counter + 1;
+            cycle_counter <= cycle_counter + 1'd1;
             data_request <= 1'b0;
 
             if (command == CMD_TX) current_state <= STATE_TX_PREP;
@@ -97,10 +97,10 @@ always @(posedge clk) begin
         end 
 
         STATE_RESET: begin
-            if (cycle_counter >= T_RESET_TICKS) current_state = STATE_CMD_FETCH_START;
+            if (cycle_counter >= T_RESET_TICKS) current_state <= STATE_CMD_FETCH_START;
         end 
 
-        default: current_state = STATE_CMD_FETCH_START;
+        default: current_state <= STATE_CMD_FETCH_START;
     endcase
 end
 

@@ -94,7 +94,7 @@ always @(posedge clk) begin
         STATE_TX: begin
             if (encoder_requests_data) begin
                 rgb_buffer <= rgb_buffer << 1;
-                rgb_bits_sent = rgb_bits_sent + 1;
+                rgb_bits_sent = rgb_bits_sent + 1'd1;
 
                 if (rgb_bits_sent == 24 - 1) begin
                     current_state <= STATE_TX_DATA_PREFETCH_START;
