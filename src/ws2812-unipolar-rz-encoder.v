@@ -97,6 +97,7 @@ always @(posedge clk) begin
         end 
 
         STATE_RESET: begin
+            cycle_counter <= cycle_counter + 1'd1;
             if (cycle_counter >= T_RESET_TICKS) current_state <= STATE_CMD_FETCH_START;
         end 
 
