@@ -30,10 +30,10 @@ always @(posedge write, posedge clear) begin
     end
     else if (clear) begin
         for (x = 0; x < WIDTH; x = x+1) begin
-            for (y = 0; y < WIDTH; y = y+1) begin
-                framebuffer[y][x][0] <= 8'd255;
-                framebuffer[y][x][1] <= 8'd0;
-                framebuffer[y][x][2] <= 8'd0;
+            for (y = 0; y < HEIGTH; y = y+1) begin
+                framebuffer[x][y][0] <= 8'd255;
+                framebuffer[x][y][1] <= 8'd0;
+                framebuffer[x][y][2] <= 8'd0;
             end
         end
     end
